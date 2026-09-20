@@ -302,15 +302,41 @@ You must still:
 4. Configure the bootloader
 5. Verify that the bootloader installation completed successfully
 
-For example, if you use **systemd-boot**, install and configure systemd-boot according to your system configuration.
-
-If you use **GRUB**, install and configure GRUB for UEFI.
-
-> **⚠️ WARNING: `arch-chroot` does NOT mean the installation is complete.**
+> **💡 THE EASY WAY: USE `efibootmgr`**
 >
-> **DO NOT reboot until the bootloader has been installed and configured.**
+> The restored system already has **`efibootmgr` and GRUB pre-installed**, so you do not need to install them again.
+>
+> For the easiest UEFI boot setup, you can use `efibootmgr` to create a UEFI boot entry that points directly to the existing GRUB EFI loader.
 
----
+## ⚡ EASY BOOTLOADER SETUP WITH `efibootmgr`
+
+Verify that the EFI System Partition is mounted:
+
+```bash
+findmnt /boot/efi
+```
+
+Then verify that GRUB's EFI loader exists:
+
+```bash
+ls /boot/efi/EFI/GRUB/grubx64.efi
+```
+
+If the file exists, create a UEFI boot entry with:
+
+```bash
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ArchLinux
+```
+
+After that:
+
+```bash
+grub-mkconfig -o /boot/grub/grub.cfg
+```
+
+> **💡 NOTE:** `efibootmgr` creates the UEFI firmware boot entry. It does not install GRUB itself. In this restore workflow, GRUB is already present in the restored system, which is why `efibootmgr` can be used as the easy way to register it with the UEFI firmware.
+
+If you prefer to reinstall/configure GRUB manually, you can still use the standard GRUB UEFI installation method for your system.
 
 # ⚠️ BEFORE REBOOTING
 
