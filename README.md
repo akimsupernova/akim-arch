@@ -206,12 +206,6 @@ Enter the repository:
 cd akim-arch
 ```
 
-Make sure the script is executable:
-
-```bash
-chmod +x pull.sh
-```
-
 Run the installer:
 
 ```bash
