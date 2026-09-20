@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="screenshot/Screenshot_2026-09-20_10.04.07.png" alt="akimpng Arch Desktop" width="100%">
+</p>
+
 # akimpng Arch Installer
 
 A simple Arch Linux restore/install script that downloads a system backup from Google Drive, extracts it to `/mnt`, generates `fstab`, and enters the installed system using `arch-chroot`.
