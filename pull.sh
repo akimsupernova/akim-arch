@@ -30,7 +30,7 @@ RESET='\033[0m'
 # -----------------------------
 # Configuration
 # -----------------------------
-FILE_ID="1PWqpZOt-i9_h7QILTqy7RcqaeSC-Azdt"
+FILE_ID="14PCUiosDxFHTX8j9GzPAArop-KtOzijr"
 
 DOWNLOAD_DIR="/mnt/123"
 EXTRACT_DIR="/mnt/124"
