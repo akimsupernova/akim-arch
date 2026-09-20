@@ -297,13 +297,7 @@ First verify that the EFI System Partition is mounted **from inside the chroot**
 findmnt /boot/efi
 ```
 
-Then verify that GRUB's EFI loader exists:
-
-```bash
-ls /boot/efi/EFI/GRUB/grubx64.efi
-```
-
-If the file exists, create a UEFI boot entry with:
+Create a UEFI boot entry with:
 
 ```bash
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=ArchLinux
