@@ -2,7 +2,7 @@
 
 A simple Arch Linux restore/install script that downloads a system backup from Google Drive, extracts it to `/mnt`, generates `fstab`, and enters the installed system using `arch-chroot`.
 
-> **⚠️ IMPORTANT: This script is designed to be run from the official Arch Linux Live ISO.**
+> **⚠️ IMPORTANT: This script is designed to be run from the Arch Linux Live environment.**
 
 ---
 
@@ -10,96 +10,61 @@ A simple Arch Linux restore/install script that downloads a system backup from G
 
 This is a **system restore script**, not a traditional Arch Linux installer.
 
-The backup was originally created from a system installed on a **16 GB drive**.
-
-**The original 16 GB drive size does NOT mean that your target installation disk must also be 16 GB.**
-
-You can restore the system to a larger disk.
-
-For example:
-
-```text
-Original backup:
-16 GB filesystem
-        │
-        ▼
-      BACKUP
-        │
-        ▼
-Target disk:
-64 GB / 128 GB / 256 GB / 1 TB
-```
-
-The script restores the **contents of the backup** into the filesystem mounted at `/mnt`.
-
-It does **not** resize your disk or recreate your partition layout.
-
----
-
-# 💾 TARGET DISK SIZE
-
-Before running the script, **you are responsible for creating the target partitions and filesystem.**
-
-The target filesystem should already be mounted at:
+The script restores the backup into the filesystem mounted at:
 
 ```text
 /mnt
 ```
 
-The size of `/mnt` can be different from the original 16 GB filesystem.
+**DO NOT run this script from an already installed Arch Linux system.**
 
-For example:
-
-```text
-Original:
-16 GB
-
-Target:
-64 GB    ✅
-128 GB   ✅
-256 GB   ✅
-512 GB   ✅
-1 TB     ✅
-```
-
-The important requirement is that the target filesystem has enough **usable free space** to contain the restored system.
+This script is intended to be run from a **fresh Arch Linux Live environment**.
 
 ---
 
-## ⚠️ DO NOT COPY THE ORIGINAL 16 GB PARTITION LAYOUT
+# 🔐 ENVIRONMENT LOGIN
 
-**DO NOT assume that the backup requires you to recreate the original 16 GB disk layout.**
-
-You should create the partition layout appropriate for **your own disk**.
-
-For example, a new installation could have:
+For the environment used with this workflow:
 
 ```text
-EFI System Partition
-        │
-        └── /boot/efi
-
-Btrfs partition
-        │
-        └── /
-            mounted at /mnt
+Username: live
+Password: live
+Root password: live
 ```
-
-The Btrfs partition can be significantly larger than the original 16 GB filesystem.
 
 ---
 
-# ⚠️ VERY IMPORTANT: TARGET `/mnt`
+# ⚠️ REQUIREMENTS
 
-Before running the script, verify that `/mnt` is the filesystem where you actually want the restored system to be installed.
+Before running the script, make sure:
 
-Check:
+* You booted into the **Arch Linux Live ISO**
+* You are working in the Live environment
+* You have root access
+* Internet connection is working
+* The target filesystem is mounted at `/mnt`
+* The target filesystem is **Btrfs**
+* An EFI System Partition exists
+* The EFI System Partition is prepared for `/boot/efi`
+* You have verified that `/mnt` is the correct installation target
+
+---
+
+# 💾 TARGET FILESYSTEM
+
+The target installation filesystem must be mounted at:
+
+```text
+/mnt
+```
+
+Verify:
 
 ```bash
 findmnt /mnt
 ```
 
-Then check the filesystem type:
+Check the filesystem type:
 
 ```bash
 findmnt -no FSTYPE /mnt
@@ -111,129 +76,58 @@ Expected:
 btrfs
 ```
 
-You can also check available space:
+You can also check the available space:
 
 ```bash
 df -h /mnt
 ```
 
-Make sure there is enough free space for the restored system.
+> **⚠️ WARNING:** Make absolutely sure `/mnt` points to the correct disk/partition before running the script.
 
----
-
-# 📦 HOW THE RESTORE WORKS
-
-The process is approximately:
-
-```text
-Google Drive
-     │
-     │  akimpng.tar.gz
-     ▼
-/mnt/123
-     │
-     │  extract
-     ▼
-/mnt/124
-     │
-     │  restore
-     ▼
-/mnt
-     │
-     ▼
-Restored Arch System
-```
-
-The backup contains the **filesystem contents**, not a requirement that the destination disk must be exactly 16 GB.
-
-The destination filesystem is the one you mounted at `/mnt`.
-
----
-
-# ⚠️ IMPORTANT: DO NOT RESTORE TO A TARGET THAT IS TOO SMALL
-
-Although the original system came from a 16 GB drive, the compressed archive may contain a substantial amount of data.
-
-Therefore, **do not determine the required target size only from the original disk size.**
-
-Check the available space on your target:
-
-```bash
-df -h /mnt
-```
-
-If the target filesystem does not have enough usable space, extraction may fail.
-
-A larger target disk is recommended.
-
----
-
-# ⚠️ IMPORTANT: BTRFS
-
-The target filesystem mounted at `/mnt` must be **Btrfs**.
-
-Verify:
-
-```bash
-findmnt -no FSTYPE /mnt
-```
-
-Expected:
-
-```text
-btrfs
-```
-
-If you get something else:
-
-```text
-ext4
-xfs
-ntfs
-...
-```
-
-**STOP.**
-
-Do not continue until `/mnt` is correctly prepared as Btrfs.
+The script will restore the system directly into `/mnt`.
 
 ---
 
 # 🥾 EFI SYSTEM PARTITION
 
-You also need an **EFI System Partition (ESP)** for a UEFI installation.
+A UEFI installation requires an **EFI System Partition (ESP)**.
 
-The restored system expects the EFI partition to be available at:
+The EFI partition must be available at:
 
 ```text
 /boot/efi
 ```
 
-After entering the restored system:
+From the Arch Live environment, it should be mounted to:
 
-```bash
-arch-chroot /mnt
+```text
+/mnt/boot/efi
 ```
 
-check:
+For example:
 
 ```bash
-findmnt /boot/efi
+mkdir -p /mnt/boot/efi
+mount /dev/your-efi-partition /mnt/boot/efi
 ```
 
-If `/boot/efi` is not mounted correctly:
+Verify:
 
-> **DO NOT REBOOT. DO NOT FINISH THE INSTALLATION.**
+```bash
+findmnt /mnt/boot/efi
+```
 
-Make sure the EFI partition is correctly mounted before installing/configuring your bootloader.
+You should see the EFI System Partition mounted there.
+
+> **⚠️ WARNING:** Do not continue if the EFI partition is not correctly mounted.
 
 ---
 
 # 🚀 INSTALLATION
 
-Boot from the **official Arch Linux ISO**.
+Boot the computer from the **Arch Linux Live ISO**.
 
-Make sure you are in the Arch Live environment and have root access.
+Make sure you are inside the Live environment.
 
 Check your disks:
 
@@ -241,11 +135,7 @@ Check your disks:
 lsblk -f
 ```
 
-Create your desired partition layout.
-
-Then format and mount the target filesystem as appropriate for your installation.
-
-For example:
+Mount your target Btrfs filesystem:
 
 ```bash
 mount /dev/your-btrfs-partition /mnt
@@ -257,33 +147,50 @@ Verify:
 findmnt /mnt
 ```
 
-Verify Btrfs:
+Verify that it is Btrfs:
 
 ```bash
 findmnt -no FSTYPE /mnt
 ```
 
-Then verify available space:
-
-```bash
-df -h /mnt
-```
-
-Make sure the EFI System Partition is also prepared for:
+Expected:
 
 ```text
-/mnt/boot/efi
+btrfs
+```
+
+Prepare the EFI partition:
+
+```bash
+mkdir -p /mnt/boot/efi
+mount /dev/your-efi-partition /mnt/boot/efi
+```
+
+Verify:
+
+```bash
+findmnt /mnt/boot/efi
 ```
 
 ---
 
-## 🌐 Check Internet
+# 🌐 CHECK INTERNET
+
+Make sure the Live environment has internet access:
 
 ```bash
 ping -c 3 archlinux.org
 ```
 
-Then clone the repository:
+If the internet connection is unavailable, **DO NOT continue**.
+
+The script needs internet access to download the backup from Google Drive.
+
+---
+
+# 📥 DOWNLOAD THE INSTALLER
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/akimsupernova/akim-arch.git
@@ -295,13 +202,13 @@ Enter the repository:
 cd akim-arch
 ```
 
-Make the script executable:
+Make sure the script is executable:
 
 ```bash
 chmod +x pull.sh
 ```
 
-Run:
+Run the installer:
 
 ```bash
 ./pull.sh
@@ -317,7 +224,7 @@ The script will:
 2. Check internet connectivity.
 3. Install the required tools.
 4. Install `gdown` if necessary.
-5. Download the system backup.
+5. Download the system backup from Google Drive.
 6. Create `/mnt/123`.
 7. Download the backup to `/mnt/123/akimpng.tar.gz`.
 8. Create `/mnt/124`.
@@ -330,9 +237,34 @@ The script will:
 
 ---
 
+# 📁 TEMPORARY DIRECTORIES
+
+During the restore process, the script creates:
+
+```text
+/mnt/123
+/mnt/124
+```
+
+The downloaded backup is stored temporarily at:
+
+```text
+/mnt/123/akimpng.tar.gz
+```
+
+The archive is temporarily extracted into:
+
+```text
+/mnt/124
+```
+
+These temporary directories are removed after the restore process.
+
+---
+
 # ⚠️ AFTER `arch-chroot`
 
-**THE INSTALLATION IS NOT FINISHED.**
+**THE INSTALLATION IS NOT FINISHED YET.**
 
 When the script enters:
 
@@ -340,53 +272,105 @@ When the script enters:
 arch-chroot /mnt
 ```
 
-you are inside the restored system.
+you are now inside the restored system.
 
-You still need to verify:
+You must still verify the EFI partition:
 
 ```bash
 findmnt /boot/efi
 ```
 
-Then check:
+It must show the EFI System Partition.
+
+Then check the generated filesystem table:
 
 ```bash
 cat /etc/fstab
 ```
 
-After that, **install and configure your bootloader**.
+---
 
-The backup does not magically make the new disk bootable just because the filesystem was restored.
+# 🥾 BOOTLOADER INSTALLATION IS REQUIRED
 
-Your bootloader must be correctly installed for the **new installation's EFI partition**.
+**DO NOT REBOOT YET.**
+
+The restore process does **NOT** guarantee that the new installation is bootable.
+
+You must still:
+
+1. Verify `/boot/efi`
+2. Check `/etc/fstab`
+3. Install your bootloader
+4. Configure the bootloader
+5. Verify that the bootloader installation completed successfully
+
+For example, if you use **systemd-boot**, install and configure systemd-boot according to your system configuration.
+
+If you use **GRUB**, install and configure GRUB for UEFI.
+
+> **⚠️ WARNING: `arch-chroot` does NOT mean the installation is complete.**
+>
+> **DO NOT reboot until the bootloader has been installed and configured.**
+
+---
+
+# ⚠️ BEFORE REBOOTING
+
+Inside the chroot, verify:
+
+```bash
+findmnt /boot/efi
+```
+
+Then:
+
+```bash
+cat /etc/fstab
+```
+
+Make sure the required filesystems and EFI mount are correct.
+
+After the bootloader has been installed and configured:
+
+```bash
+exit
+```
+
+Then reboot:
+
+```bash
+reboot
+```
+
+Remove the Arch Linux USB/ISO when the system starts rebooting.
 
 ---
 
 # ⚠️ FINAL CHECKLIST
 
-Before running `./pull.sh`:
+## Before running `./pull.sh`
 
-* [ ] Booted from the **official Arch Linux ISO**
-* [ ] Running in the **Arch Live environment**
+* [ ] Booted from the **Arch Linux Live ISO**
+* [ ] Running in the **Live environment**
+* [ ] Live username is `live`
+* [ ] Live user password is `live`
+* [ ] Root password is `live`
 * [ ] Running as root
 * [ ] Internet connection works
 * [ ] Correct target disk has been identified
 * [ ] Target filesystem is mounted at `/mnt`
 * [ ] `/mnt` is **Btrfs**
-* [ ] Target filesystem is large enough for the restored system
-* [ ] You understand that the backup originally came from a **16 GB drive**
-* [ ] You understand that the target disk **does NOT need to be 16 GB**
 * [ ] EFI System Partition exists
-* [ ] EFI partition is prepared for `/boot/efi`
-* [ ] You have verified that `/mnt` is the correct target
+* [ ] EFI partition is mounted at `/mnt/boot/efi`
+* [ ] `/mnt` has been verified as the correct installation target
 
-After `arch-chroot`:
+## After `arch-chroot`
 
 * [ ] `/boot/efi` is mounted correctly
 * [ ] `/etc/fstab` has been checked
 * [ ] Bootloader has been installed
 * [ ] Bootloader configuration has been completed
-* [ ] System is ready to boot from the new disk
+* [ ] System is ready to boot
 
 ---
 
@@ -398,4 +382,4 @@ Created by **akimpng**.
 
 **AKIMPNG ARCH RESTORE WORKFLOW**
 
-The goal of this project is to make restoring an Arch Linux system from a backup as simple and portable as possible.
+The goal of this project is to make restoring an Arch Linux system as simple and straightforward as possible.
