@@ -102,28 +102,11 @@ The EFI partition must be available at:
 /boot/efi
 ```
 
-From the Arch Live environment, it should be mounted to:
-
-```text
-/mnt/boot/efi
-```
-
-For example:
-
-```bash
-mkdir -p /mnt/boot/efi
-mount /dev/your-efi-partition /mnt/boot/efi
-```
-
-Verify:
-
-```bash
-findmnt /mnt/boot/efi
-```
-
-You should see the EFI System Partition mounted there.
-
-> **⚠️ WARNING:** Do not continue if the EFI partition is not correctly mounted.
+> **⚠️ IMPORTANT:** Do **NOT** mount the EFI System Partition to `/mnt/boot/efi` before the backup restore.
+>
+> The backup filesystem already contains `/boot/efi`. If the ESP is mounted at `/mnt/boot/efi` before the restore, the mounted filesystem can hide the `/boot/efi` directory from the backup and cause the restore to conflict with the existing EFI filesystem contents.
+>
+> The ESP must therefore be mounted **only after the backup has finished restoring and after entering `arch-chroot`**.
 
 ---
 
@@ -163,18 +146,11 @@ Expected:
 btrfs
 ```
 
-Prepare the EFI partition:
-
-```bash
-mkdir -p /mnt/boot/efi
-mount /dev/your-efi-partition /mnt/boot/efi
-```
-
-Verify:
-
-```bash
-findmnt /mnt/boot/efi
-```
+> **⚠️ DO NOT MOUNT THE EFI PARTITION HERE**
+>
+> At this point `/mnt` must contain only the target filesystem. Do **not** mount the ESP to `/mnt/boot/efi` yet.
+>
+> The restore process must first restore the backup, including its `/boot/efi` directory, without another filesystem mounted over it.
 
 ---
 
@@ -230,8 +206,9 @@ The script will:
 10. Restore the system contents into `/mnt`.
 11. Remove `/mnt/123`.
 12. Remove `/mnt/124`.
-13. Generate `/mnt/etc/fstab`.
-14. Enter the restored system using `arch-chroot`.
+13. Enter the restored system using `arch-chroot`.
+14. Mount the EFI System Partition at `/boot/efi` from inside the chroot.
+15. Generate or verify `/etc/fstab` after the EFI partition is mounted.
 
 ---
 
@@ -272,7 +249,17 @@ arch-chroot /mnt
 
 you are now inside the restored system.
 
-You must still verify the EFI partition:
+## 🥾 Mount the EFI partition AFTER the restore
+
+**This is the required point to mount the EFI System Partition.**
+
+Inside the chroot:
+
+```bash
+mount /dev/your-efi-partition /boot/efi
+```
+
+Verify:
 
 ```bash
 findmnt /boot/efi
@@ -280,13 +267,7 @@ findmnt /boot/efi
 
 It must show the EFI System Partition.
 
-Then check the generated filesystem table:
-
-```bash
-cat /etc/fstab
-```
-
----
+> **⚠️ IMPORTANT:** The EFI partition is intentionally mounted here, **after the backup has been restored**. Do not mount it at `/mnt/boot/efi` before running the restore.
 
 # 🥾 BOOTLOADER INSTALLATION IS REQUIRED
 
@@ -310,7 +291,7 @@ You must still:
 
 ## ⚡ EASY BOOTLOADER SETUP WITH `efibootmgr`
 
-Verify that the EFI System Partition is mounted:
+First verify that the EFI System Partition is mounted **from inside the chroot**:
 
 ```bash
 findmnt /boot/efi
@@ -337,22 +318,6 @@ grub-mkconfig -o /boot/grub/grub.cfg
 > **💡 NOTE:** `efibootmgr` creates the UEFI firmware boot entry. It does not install GRUB itself. In this restore workflow, GRUB is already present in the restored system, which is why `efibootmgr` can be used as the easy way to register it with the UEFI firmware.
 
 If you prefer to reinstall/configure GRUB manually, you can still use the standard GRUB UEFI installation method for your system.
-
-# ⚠️ BEFORE REBOOTING
-
-Inside the chroot, verify:
-
-```bash
-findmnt /boot/efi
-```
-
-Then:
-
-```bash
-cat /etc/fstab
-```
-
-Make sure the required filesystems and EFI mount are correct.
 
 After the bootloader has been installed and configured:
 
@@ -385,13 +350,15 @@ Remove the Arch Linux USB/ISO when the system starts rebooting.
 * [ ] Target filesystem is mounted at `/mnt`
 * [ ] `/mnt` is **Btrfs**
 * [ ] EFI System Partition exists
-* [ ] EFI partition is mounted at `/mnt/boot/efi`
+* [ ] EFI partition is **NOT mounted at `/mnt/boot/efi`**
 * [ ] `/mnt` has been verified as the correct installation target
 
 ## After `arch-chroot`
 
-* [ ] `/boot/efi` is mounted correctly
-* [ ] `/etc/fstab` has been checked
+* [ ] Backup restore has completed
+* [ ] `/boot/efi` directory from the backup is present
+* [ ] EFI System Partition is mounted at `/boot/efi`
+* [ ] `/etc/fstab` has been checked/generated with the ESP mounted
 * [ ] Bootloader has been installed
 * [ ] Bootloader configuration has been completed
 * [ ] System is ready to boot
