@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # ============================================================
@@ -8,7 +7,7 @@
 #  Custom Arch installation script by akimpng
 #
 #  Logic:
-#    1. Download backup.tar.gz from Google Drive
+#    1. Download akimpng.tar.gz from Hugging Face
 #    2. Extract it to a temporary directory
 #    3. Move /mnt/install/* to /mnt
 #    4. Generate fstab
@@ -30,7 +29,7 @@ RESET='\033[0m'
 # -----------------------------
 # Configuration
 # -----------------------------
-FILE_ID="14PCUiosDxFHTX8j9GzPAArop-KtOzijr"
+HF_URL="https://huggingface.co/datasets/akimpng/archprebuild/resolve/main/akimpng.tar.gz"
 
 DOWNLOAD_DIR="/mnt/123"
 EXTRACT_DIR="/mnt/124"
@@ -98,7 +97,7 @@ if ! ping -c 1 -W 3 archlinux.org >/dev/null 2>&1; then
     warning "Internet connection appears to be unavailable."
     echo
     echo "This installer requires an active internet connection"
-    echo "to download the Arch backup from Google Drive."
+    echo "to download the prebuild Arch system from Hugging Face."
     echo
     echo "Please check your network connection and run the script again."
     echo
@@ -106,36 +105,6 @@ if ! ping -c 1 -W 3 archlinux.org >/dev/null 2>&1; then
 fi
 
 success "Internet connection is available."
-
-# -----------------------------
-# Install required tools
-# -----------------------------
-
-info "Installing required tools..."
-
-if ! pacman -Sy --needed --noconfirm python-pip; then
-    error_exit "Failed to install python-pip. Check your internet connection or pacman configuration."
-fi
-
-success "python-pip is ready."
-
-# -----------------------------
-# Install gdown
-# -----------------------------
-
-info "Checking gdown..."
-
-if ! command -v gdown >/dev/null 2>&1; then
-    info "gdown is not installed. Installing it now..."
-
-    if ! pip install --break-system-packages gdown; then
-        error_exit "Failed to install gdown."
-    fi
-
-    success "gdown installed."
-else
-    success "gdown is already installed."
-fi
 
 # -----------------------------
 # Prepare directories
@@ -149,59 +118,60 @@ mkdir -p "$EXTRACT_DIR"
 success "Temporary directories ready."
 
 # -----------------------------
-# Download backup
+# Download prebuild
 # -----------------------------
 
 echo
 echo "============================================================"
-echo "                 DOWNLOADING ARCH BACKUP"
+echo "                 DOWNLOADING ARCH"
 echo "============================================================"
 echo
 
-info "Downloading backup from Google Drive..."
+info "Downloading prebuild from Hugging Face..."
+info "Source: $HF_URL"
 info "Destination: $BACKUP_FILE"
 echo
 
-if ! gdown "https://drive.google.com/uc?id=${FILE_ID}" -O "$BACKUP_FILE"; then
+if ! curl -L --fail -o "$BACKUP_FILE" "$HF_URL"; then
     echo
-    warning "Google Drive download failed."
+    warning "Hugging Face download failed."
     echo
     echo "Possible causes:"
     echo "  - Internet connection was lost"
-    echo "  - Google Drive is unavailable"
+    echo "  - Hugging Face is unavailable"
     echo "  - The file is no longer publicly accessible"
-    echo "  - The Google Drive file ID is invalid"
+    echo "  - The URL is invalid"
     echo
-    error_exit "Unable to download the Arch backup."
+    error_exit "Unable to download the prebuild system."
 fi
 
 if [ ! -f "$BACKUP_FILE" ]; then
-    error_exit "Download finished but the backup file was not found."
+    error_exit "Download finished but the prebuild file was not found."
 fi
 
-success "Backup downloaded successfully."
+success "Arch downloaded successfully."
 
 echo
-echo "Backup size:"
+echo "Prebuild size:"
 ls -lh "$BACKUP_FILE"
 echo
 
 # -----------------------------
-# Extract backup
+# Extract prebuild
 # -----------------------------
 
 echo "============================================================"
-echo "                    EXTRACTING BACKUP"
+echo "                    EXTRACTING FILE"
 echo "============================================================"
 echo
 
-info "Extracting backup to $EXTRACT_DIR..."
+info "Extracting system file to $EXTRACT_DIR..."
 
 if ! tar -xvzpf "$BACKUP_FILE" -C "$EXTRACT_DIR"; then
-    error_exit "Failed to extract the backup archive."
+    error_exit "Failed to extract the archive."
 fi
 
-success "Backup extracted successfully."
+success "System extracted successfully."
 
 # -----------------------------
 # Move installed system
@@ -236,28 +206,6 @@ rm -rf "$EXTRACT_DIR"
 
 success "Temporary files removed."
 
-# -----------------------------
-# Generate fstab
-# -----------------------------
-
-echo
-echo "============================================================"
-echo "                    GENERATING FSTAB"
-echo "============================================================"
-echo
-
-info "Generating /mnt/etc/fstab..."
-
-if ! genfstab -U /mnt >> /mnt/etc/fstab; then
-    error_exit "Failed to generate fstab."
-fi
-
-success "fstab generated successfully."
-
-# -----------------------------
-# Finish
-# -----------------------------
-
 echo
 echo "============================================================"
 echo "                       COMPLETE"
@@ -266,13 +214,35 @@ echo
 
 echo -e "${GREEN}Arch installation environment is ready.${RESET}"
 echo
-echo "Entering arch-chroot..."
-echo
 echo -e "${CYAN}Created by akimpng${RESET}"
 echo
 
-# -----------------------------
-# Enter chroot
-# -----------------------------
+echo "============================================================"
+echo "                     NEXT STEPS"
+echo "============================================================"
+echo
+echo -e "${YELLOW}The system files are in place, but a few manual steps"
+echo -e "are still needed before you can boot into it.${RESET}"
+echo
 
-arch-chroot /mnt
+echo -e "${CYAN}1) Mount your EFI partition${RESET}"
+echo "   Replace /dev/sdXn with your actual EFI partition."
+echo
+echo -e "   ${GREEN}mount /dev/sdXn /mnt/boot/efi${RESET}"
+echo
+
+echo -e "${CYAN}2) Generate the fstab${RESET}"
+echo "   This tells the system which partitions to mount at boot."
+echo
+echo -e "   ${GREEN}genfstab -U /mnt >> /mnt/etc/fstab${RESET}"
+echo
+
+echo -e "${CYAN}3) Enter the new system${RESET}"
+echo "   Chroot into /mnt to finish configuration (bootloader,"
+echo "   hostname, users, etc.)."
+echo
+echo -e "   ${GREEN}arch-chroot /mnt${RESET}"
+echo
+
+echo "============================================================"
+echo
