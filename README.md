@@ -4,7 +4,7 @@
 
 # Arch Custom Installer
 
-A simple Arch Linux restore/install script that downloads a prebuild system, extracts it to `/mnt`, generates `fstab`, and enters the installed system using `arch-chroot`.
+A simple Arch Linux restore/install script that downloads a prebuild system from Hugging Face, extracts it, and restores it into `/mnt`. Once the restore is finished, the script prints the exact commands you run manually to mount the EFI partition, generate `fstab`, and enter the installed system with `arch-chroot`.
 
 > **IMPORTANT: This script is designed to be run from the Arch Linux Live environment.**
 
@@ -14,7 +14,7 @@ A simple Arch Linux restore/install script that downloads a prebuild system, ext
 
 This is a **system restore script**, not a traditional Arch Linux installer.
 
-The script restores the backup into the filesystem mounted at:
+The script restores the prebuild system into the filesystem mounted at:
 
 ```text
 /mnt
@@ -28,7 +28,7 @@ This script is intended to be run from a **fresh Arch Linux Live environment**.
 
 # ENVIRONMENT LOGIN
 
-For the environment used with this workflow:
+For the system environment used with this workflow:
 
 ```text
 Username: live
@@ -102,11 +102,11 @@ The EFI partition must be available at:
 /boot/efi
 ```
 
-> **IMPORTANT:** Do **NOT** mount the EFI System Partition to `/mnt/boot/efi` before the backup restore.
+> **IMPORTANT:** Do **NOT** mount the EFI System Partition to `/mnt/boot/efi` before the system restore.
 >
-> The backup filesystem already contains `/boot/efi`. If the ESP is mounted at `/mnt/boot/efi` before the restore, the mounted filesystem can hide the `/boot/efi` directory from the backup and cause the restore to conflict with the existing EFI filesystem contents.
+> The prebuild filesystem already contains `/boot/efi`. If the ESP is mounted at `/mnt/boot/efi` before the restore, the mounted filesystem can hide the `/boot/efi` directory from the system and cause the restore to conflict with the existing EFI filesystem contents.
 >
-> The ESP must therefore be mounted **only after the backup has finished restoring and after entering `arch-chroot`**.
+> The ESP must therefore be mounted **only after `pull.sh` has finished restoring the system**, right before you generate `fstab` and enter `arch-chroot` (the script prints these steps for you at the end).
 
 ---
 
@@ -150,11 +150,17 @@ btrfs
 >
 > At this point `/mnt` must contain only the target filesystem. Do **not** mount the ESP to `/mnt/boot/efi` yet.
 >
-> The restore process must first restore the backup, including its `/boot/efi` directory, without another filesystem mounted over it.
+> The restore process must first restore the prebuild system, including its `/boot/efi` directory, without another filesystem mounted over it.
 
 ---
 
 # DOWNLOAD THE INSTALLER
+
+The Arch Linux Live ISO does not include `git` by default. Install it first:
+
+```bash
+pacman -Sy git
+```
 
 Clone this repository:
 
@@ -174,39 +180,56 @@ Run the installer:
 ./pull.sh
 ```
 
+The script will:
+
+1. Check that you are root and connected to the internet
+2. Download `akimpng.tar.gz` from Hugging Face
+3. Extract it and restore its contents into `/mnt`
+4. Clean up temporary files
+
+When it's done, it does **not** mount the EFI partition, generate `fstab`, or enter `arch-chroot` automatically — it prints the exact commands for those steps so you can run each one yourself, in order.
+
 ---
 
-# AFTER `arch-chroot`
+# AFTER THE SCRIPT FINISHES
 
 **THE INSTALLATION IS NOT FINISHED YET.**
 
-When the script enters:
+Follow the three steps `pull.sh` prints at the end, in this exact order.
+
+## Step 1 — Mount the EFI partition
+
+**This is the required point to mount the EFI System Partition** — now that the restore is finished, but before generating `fstab` or entering the chroot.
 
 ```bash
-arch-chroot /mnt
-```
-
-you are now inside the restored system.
-
-## Mount the EFI partition AFTER the restore
-
-**This is the required point to mount the EFI System Partition.**
-
-Inside the chroot:
-
-```bash
-mount /dev/your-efi-partition /boot/efi
+mount /dev/your-efi-partition /mnt/boot/efi
 ```
 
 Verify:
 
 ```bash
-findmnt /boot/efi
+findmnt /mnt/boot/efi
 ```
 
 It must show the EFI System Partition.
 
-> **IMPORTANT:** The EFI partition is intentionally mounted here, **after the backup has been restored**. Do not mount it at `/mnt/boot/efi` before running the restore.
+> **IMPORTANT:** The EFI partition is intentionally mounted here, **after the system has been restored**. Do not mount it at `/mnt/boot/efi` before running the restore.
+
+## Step 2 — Generate fstab
+
+Mounting the ESP first means it gets included correctly in `fstab`:
+
+```bash
+genfstab -U /mnt >> /mnt/etc/fstab
+```
+
+## Step 3 — Enter the chroot
+
+```bash
+arch-chroot /mnt
+```
+
+You are now inside the restored system.
 
 # BOOTLOADER INSTALLATION IS REQUIRED
 
@@ -251,6 +274,28 @@ reboot
 ```
 
 Remove the Arch Linux USB/ISO when the system starts rebooting.
+
+---
+
+# NVIDIA GPU NOTE
+
+If you have an **NVIDIA GPU**, driver setup is not guaranteed to work out of the box.
+
+You may need to **troubleshoot the NVIDIA driver yourself** after first boot (proprietary vs open kernel modules, Wayland/Hyprland-specific env vars, etc.). This restore image is not tuned for every NVIDIA configuration, so check the [Arch Wiki NVIDIA page](https://wiki.archlinux.org/title/NVIDIA) and the [Hyprland NVIDIA guide](https://wiki.hypr.land/Nvidia/) if you run into graphical issues, black screens, or tearing.
+
+---
+
+# MONITOR CONFIGURATION (Hyprland)
+
+The desktop environment is **Hyprland**. Monitor setup (resolution, refresh rate, position, scaling) is configured at:
+
+```text
+/home/live/.config/hypr/hyprland/general.lua
+```
+
+Edit this file to match your monitor(s). For a full guide on the available options and syntax, see the official Hyprland docs:
+
+**[https://wiki.hypr.land/Configuring/Basics/Monitors/](https://wiki.hypr.land/Configuring/Basics/Monitors/)**
 
 ---
 
