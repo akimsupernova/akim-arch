@@ -241,6 +241,118 @@ Edit this file to match your monitor(s). For a full guide on the available optio
 
 ---
 
-# Credits
+# KEYBINDINGS
 
-**AKIMPNG**
+> **Super** = `SUPER` / Windows key
+
+## Shell & UI
+
+| Keybind | Action |
+|---|---|
+| `Super` | Toggle search |
+| `Super + Tab` | Workspace overview |
+| `Super + V` | Clipboard history |
+| `Super + .` | Emoji picker |
+| `Super + A` | Left sidebar |
+| `Super + N` | Right sidebar |
+| `Super + B` | Toggle cleaner |
+| `Super + /` | Keybind cheatsheet |
+| `Super + K` | On-screen keyboard |
+| `Super + M` | Media controls |
+| `Super + G` | Widget overlay |
+| `Super + J` | Toggle bar |
+| `Ctrl + Alt + Delete` | Session menu |
+| `Super + L` | Lock screen |
+| `Super + Shift + L` | Suspend |
+
+## Applications
+
+| Keybind | Action |
+|---|---|
+| `Super + Enter` / `Super + T` | Terminal |
+| `Super + E` | File manager |
+| `Super + W` | Browser |
+| `Super + C` | Code editor |
+| `Ctrl + Super + V` | Volume mixer |
+| `Super + I` | Settings |
+| `Ctrl + Shift + Esc` | Task manager |
+| `Ctrl + Super + Shift + Alt + W` | Office |
+
+## Windows
+
+| Keybind | Action |
+|---|---|
+| `Super + Left/Right/Up/Down` | Focus window |
+| `Super + Shift + Left/Right/Up/Down` | Move window |
+| `Super + Left Click` | Move window |
+| `Super + Right Click` | Resize window |
+| `Super + Q` | Close window |
+| `Super + Shift + Alt + Q` | Force close window |
+| `Super + Alt + Space` | Float / tile |
+| `Super + D` | Maximize |
+| `Super + F` | Fullscreen |
+| `Super + Alt + F` | Fullscreen spoof |
+| `Super + P` | Pin window |
+| `Super + ;` / `Super + '` | Adjust split ratio |
+| `Super + Alt + 1–0` | Send window to workspace 1–10 |
+| `Super + Alt + S` | Send window to scratchpad |
+| `Ctrl + Super + S` | Toggle scratchpad |
+| `Ctrl + Super + Backslash` | Resize window to 640×480 |
+
+## Workspaces
+
+| Keybind | Action |
+|---|---|
+| `Super + 1–0` | Switch to workspace 1–10 |
+| `Ctrl + Super + Left/Right` | Previous / next workspace |
+| `Super + Page Up/Down` | Previous / next workspace |
+| `Ctrl + Super + Page Up/Down` | Previous / next workspace |
+| `Super + S` | Toggle scratchpad |
+
+## Screenshots & Capture
+
+| Keybind | Action |
+|---|---|
+| `Super + Space` | Screenshot → clipboard |
+| `Ctrl + Super + Space` | Screenshot → file |
+| `Super + Shift + S` | Region screenshot |
+| `Super + Shift + A` | Region search |
+| `Super + Shift + X` | OCR selected region |
+| `Super + Shift + T` | Translate screen |
+| `Super + Shift + C` | Color picker |
+| `Super + Shift + R` | Record region |
+| `Super + Alt + R` | Record region |
+| `Ctrl + Alt + R` | Record fullscreen |
+| `Super + Shift + Alt + R` | Record fullscreen + sound |
+
+## Media & Audio
+
+| Keybind | Action |
+|---|---|
+| `Super + Shift + N` | Next track |
+| `Super + Shift + B` | Previous track |
+| `Super + Shift + M` | Toggle audio mute |
+| `Super + Alt + M` | Toggle microphone mute |
+| `Super + Shift + P` | Shutdown |
+| `Super + Scroll Mouse Up` | Volume up |
+| `Super + Scroll Mouse Down` | Volume down |
+
+## Screen & Appearance
+
+| Keybind | Action |
+|---|---|
+| `Super + -` | Zoom out |
+| `Super + =` | Zoom in |
+| `Ctrl + Super + T` | Wallpaper selector |
+| `Ctrl + Super + Alt + T` | Random wallpaper |
+| `Ctrl + Super + Shift + D` | Toggle light / dark mode |
+| `Ctrl + Super + R` | Restart widgets |
+| `Ctrl + Super + P` | Cycle panel family |
+
+## Virtual Machine Mode
+
+| Keybind | Action |
+|---|---|
+| `Super + Alt + F1` | Enter / exit VM mode |
+
+When VM mode is active, other keybindings are disabled until `Super + Alt + F1` is pressed again.
