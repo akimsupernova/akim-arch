@@ -1,14 +1,12 @@
 <p align="center">
-  <img src="screenshot/Screenshot_2026-09-20_10.04.07.png" alt="akimpng Arch Desktop" width="100%">
+  <img src="screenshot/Screenshot_2026-09-21_22.32.44.png" alt="akimpng Arch Desktop" width="100%">
 </p>
 
 # Arch Custom Installer
 
-A simple Arch Linux restore/install script that downloads a prebuild system from Hugging Face, extracts it, and restores it into `/mnt`. Once the restore is finished, the script prints the exact commands you run manually to mount the EFI partition, generate `fstab`, and enter the installed system with `arch-chroot`.
+A simple Arch Linux install script that downloads a prebuild system.
 
 > **IMPORTANT: This script is designed to be run from the Arch Linux Live environment.**
-
----
 
 # READ THIS BEFORE INSTALLING
 
@@ -24,19 +22,15 @@ The script restores the prebuild system into the filesystem mounted at:
 
 This script is intended to be run from a **fresh Arch Linux Live environment**.
 
----
+## Environment Login
 
-# ENVIRONMENT LOGIN
+**Default credentials** for the prebuilt system:
 
-For the system environment used with this workflow:
+- **Username:** `live`
+- **Password:** `live`
+- **Root password:** `live`
 
-```text
-Username: live
-Password: live
-Root password: live
-```
-
----
+> Please change the default password after the first login.
 
 # TARGET FILESYSTEM
 
@@ -72,9 +66,7 @@ df -h /mnt
 
 > **WARNING:** Make absolutely sure `/mnt` points to the correct disk/partition before running the script.
 
-The script will restore the system directly into `/mnt`.
-
----
+The script will install the system directly into `/mnt`.
 
 # EFI SYSTEM PARTITION
 
@@ -86,13 +78,11 @@ The EFI partition must be available at:
 /boot/efi
 ```
 
-> **IMPORTANT:** Do **NOT** mount the EFI System Partition to `/mnt/boot/efi` before the system restore.
+> **IMPORTANT:** Do **NOT** mount the EFI System Partition to `/mnt/boot/efi` before the system install.
 >
 > The prebuild filesystem already contains `/boot/efi`. If the ESP is mounted at `/mnt/boot/efi` before the restore, the mounted filesystem can hide the `/boot/efi` directory from the system and cause the restore to conflict with the existing EFI filesystem contents.
 >
 > The ESP must therefore be mounted **only after `install.sh` has finished restoring the system**, right before you generate `fstab` and enter `arch-chroot` (the script prints these steps for you at the end).
-
----
 
 # INSTALLATION
 
@@ -107,7 +97,7 @@ pacman -Sy git
 Clone this repository:
 
 ```bash
-git clone https://github.com/akimsupernova/akim-arch.git
+git clone https://github.com/akimsupernova/akim-arch
 ```
 
 Enter the repository:
@@ -122,16 +112,7 @@ Run the installer:
 ./install.sh
 ```
 
-The script will:
-
-1. Check that you are root and connected to the internet
-2. Download `akimpng.tar.gz` from Hugging Face
-3. Extract it and restore its contents into `/mnt`
-4. Clean up temporary files
-
 When it's done, it does **not** mount the EFI partition, generate `fstab`, or enter `arch-chroot` automatically — it prints the exact commands for those steps so you can run each one yourself, in order.
-
----
 
 # AFTER THE SCRIPT FINISHES
 
@@ -172,6 +153,28 @@ arch-chroot /mnt
 ```
 
 You are now inside the restored system.
+
+## Change username and password
+
+After restoring the system, the default user is `live`
+Follow the steps below to rename the user and set a new password.
+```bash
+usermod -l your_name live
+```
+```bash
+usermod -d /home/your_name -m your_name
+```
+```bash
+groupmod -n your_name live
+```
+```bash
+sed -i 's/User=live/User=your_name/' /etc/sddm.conf
+```
+
+Password.
+```bash
+passwd your_name
+```
 
 # BOOTLOADER INSTALLATION IS REQUIRED
 
@@ -217,15 +220,11 @@ reboot
 
 Remove the Arch Linux USB/ISO when the system starts rebooting.
 
----
-
 # NVIDIA GPU NOTE
 
 If you have an **NVIDIA GPU**, driver setup is not guaranteed to work out of the box.
 
 You may need to **troubleshoot the NVIDIA driver yourself** after first boot (proprietary vs open kernel modules, Wayland/Hyprland-specific env vars, etc.). This restore image is not tuned for every NVIDIA configuration, so check the [Arch Wiki NVIDIA page](https://wiki.archlinux.org/title/NVIDIA) and the [Hyprland NVIDIA guide](https://wiki.hypr.land/Nvidia/) if you run into graphical issues, black screens, or tearing.
-
----
 
 # MONITOR CONFIGURATION (Hyprland)
 
@@ -238,8 +237,6 @@ The desktop environment is **Hyprland**. Monitor setup (resolution, refresh rate
 Edit this file to match your monitor(s). For a full guide on the available options and syntax, see the official Hyprland docs:
 
 **[https://wiki.hypr.land/Configuring/Basics/Monitors/](https://wiki.hypr.land/Configuring/Basics/Monitors/)**
-
----
 
 # KEYBINDINGS
 
@@ -356,3 +353,21 @@ Edit this file to match your monitor(s). For a full guide on the available optio
 | `Super + Alt + F1` | Enter / exit VM mode |
 
 When VM mode is active, other keybindings are disabled until `Super + Alt + F1` is pressed again.
+
+## Credits
+
+This project uses and modifies dotfiles originally created by: [end-4](https://github.com/end-4)
+
+The original dotfiles have been modified and extended for this project.
+
+Modified by: [Akim](https://github.com/akimsupernova)
+
+Additional work includes:
+- Custom installation/setup scripts
+- Additional tools
+- System configuration
+- Desktop environment configuration
+- Modified dotfiles and workflows
+
+This project is distributed under the GNU General Public License v3.0.
+See LICENSE for the full license text.
