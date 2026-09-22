@@ -38,22 +38,6 @@ Root password: live
 
 ---
 
-# REQUIREMENTS
-
-Before running the script, make sure:
-
-* You booted into the **Arch Linux Live ISO**
-* You are working in the Live environment
-* You have root access
-* Internet connection is working
-* The target filesystem is mounted at `/mnt`
-* The target filesystem is **Btrfs**
-* An EFI System Partition exists
-* The EFI System Partition is prepared for `/boot/efi`
-* You have verified that `/mnt` is the correct installation target
-
----
-
 # TARGET FILESYSTEM
 
 The target installation filesystem must be mounted at:
@@ -112,49 +96,7 @@ The EFI partition must be available at:
 
 # INSTALLATION
 
-Boot the computer from the **Arch Linux Live ISO**.
-
-Make sure you are inside the Live environment.
-
-Check your disks:
-
-```bash
-lsblk -f
-```
-
-Mount your target Btrfs filesystem:
-
-```bash
-mount /dev/your-btrfs-partition /mnt
-```
-
-Verify:
-
-```bash
-findmnt /mnt
-```
-
-Verify that it is Btrfs:
-
-```bash
-findmnt -no FSTYPE /mnt
-```
-
-Expected:
-
-```text
-btrfs
-```
-
-> **DO NOT MOUNT THE EFI PARTITION HERE**
->
-> At this point `/mnt` must contain only the target filesystem. Do **not** mount the ESP to `/mnt/boot/efi` yet.
->
-> The restore process must first restore the prebuild system, including its `/boot/efi` directory, without another filesystem mounted over it.
-
----
-
-# DOWNLOAD THE INSTALLER
+Download [Arch Linux ISO](https://archlinux.org/download/) flash it to your usb drive and boot into it. Make sure disable **Secure Boot**.
 
 The Arch Linux Live ISO does not include `git` by default. Install it first:
 
