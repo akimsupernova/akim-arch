@@ -90,7 +90,7 @@ The EFI partition must be available at:
 >
 > The prebuild filesystem already contains `/boot/efi`. If the ESP is mounted at `/mnt/boot/efi` before the restore, the mounted filesystem can hide the `/boot/efi` directory from the system and cause the restore to conflict with the existing EFI filesystem contents.
 >
-> The ESP must therefore be mounted **only after `pull.sh` has finished restoring the system**, right before you generate `fstab` and enter `arch-chroot` (the script prints these steps for you at the end).
+> The ESP must therefore be mounted **only after `install.sh` has finished restoring the system**, right before you generate `fstab` and enter `arch-chroot` (the script prints these steps for you at the end).
 
 ---
 
@@ -119,7 +119,7 @@ cd akim-arch
 Run the installer:
 
 ```bash
-./pull.sh
+./install.sh
 ```
 
 The script will:
@@ -137,7 +137,7 @@ When it's done, it does **not** mount the EFI partition, generate `fstab`, or en
 
 **THE INSTALLATION IS NOT FINISHED YET.**
 
-Follow the three steps `pull.sh` prints at the end, in this exact order.
+Follow the three steps `install.sh` prints at the end, in this exact order.
 
 ## Step 1 — Mount the EFI partition
 
