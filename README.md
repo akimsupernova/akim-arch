@@ -356,18 +356,20 @@ When VM mode is active, other keybindings are disabled until `Super + Alt + F1` 
 
 ## Credits
 
-This project uses and modifies dotfiles originally created by: [end-4](https://github.com/end-4)
+The Hyprland and desktop configuration in this project is based on
+dotfiles originally created by [end-4](https://github.com/end-4).
 
-The original dotfiles have been modified and extended for this project.
+The original dotfiles have been substantially modified and extended
+for this project.
 
-Modified by: [Akim](https://github.com/akimsupernova)
+Modified and maintained by [Akim](https://github.com/akimsupernova).
 
 Additional work includes:
-- Custom installation/setup scripts
-- Additional tools
+- Custom Arch Linux installation and system restore scripts
+- Additional tools and packages
 - System configuration
 - Desktop environment configuration
 - Modified dotfiles and workflows
 
 This project is distributed under the GNU General Public License v3.0.
-See LICENSE for the full license text.
+See [LICENSE](LICENSE) for the full license text.
