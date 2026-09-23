@@ -480,7 +480,7 @@ When VM mode is active, other keybindings are disabled until `Super + Alt + F1` 
 ## Credits
 
 The Hyprland and desktop configuration in this project is based on
-dotfiles originally created by [end-4](https://github.com/end-4).
+[dotfiles](https://github.com/end-4/dots-hyprland) originally created by [end-4](https://github.com/end-4).
 
 The original dotfiles have been substantially modified and extended
 for this project.
