@@ -67,7 +67,7 @@ clear
 
 echo -e "${CYAN}"
 echo "============================================================"
-echo "                 AKIMPNG ARCH INSTALLER"
+echo "                  AKIMPNG ARCH INSTALLER"
 echo "============================================================"
 echo -e "${RESET}"
 
@@ -123,12 +123,11 @@ success "Temporary directories ready."
 
 echo
 echo "============================================================"
-echo "                    DOWNLOADING ARCH"
+echo "                     DOWNLOADING ARCH"
 echo "============================================================"
 echo
 
 info "Downloading prebuild files..."
-info "Destination: $BACKUP_FILE"
 echo
 
 if ! curl -L --fail -o "$BACKUP_FILE" "$HF_URL"; then
@@ -163,7 +162,7 @@ echo "                    EXTRACTING FILE"
 echo "============================================================"
 echo
 
-info "Extracting system file to $EXTRACT_DIR..."
+info "Extracting system file..."
 
 if ! tar -xvzpf "$BACKUP_FILE" -C "$EXTRACT_DIR"; then
     error_exit "Failed to extract the archive."
