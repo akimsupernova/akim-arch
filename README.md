@@ -266,7 +266,7 @@ It must show the EFI System Partition.
 Mounting the ESP first means it gets included correctly in `fstab`:
 
 ```bash
-genfstab -U /mnt >> /mnt/etc/fstab
+genfstab -U /mnt > /mnt/etc/fstab
 ```
 
 ## Step 3 — Enter the chroot
