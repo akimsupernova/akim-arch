@@ -123,22 +123,20 @@ success "Temporary directories ready."
 
 echo
 echo "============================================================"
-echo "                 DOWNLOADING ARCH"
+echo "                    DOWNLOADING ARCH"
 echo "============================================================"
 echo
 
-info "Downloading prebuild from Hugging Face..."
-info "Source: $HF_URL"
+info "Downloading prebuild files..."
 info "Destination: $BACKUP_FILE"
 echo
 
 if ! curl -L --fail -o "$BACKUP_FILE" "$HF_URL"; then
     echo
-    warning "Hugging Face download failed."
+    warning "Prebuild download failed."
     echo
     echo "Possible causes:"
     echo "  - Internet connection was lost"
-    echo "  - Hugging Face is unavailable"
     echo "  - The file is no longer publicly accessible"
     echo "  - The URL is invalid"
     echo
