@@ -10,9 +10,9 @@ A simple Arch Linux install script that downloads a prebuild system.
 
 # READ THIS BEFORE INSTALLING
 
-This is a **system restore script**, not a traditional Arch Linux installer.
+This is a **system install script**, not a traditional Arch Linux installer.
 
-The script restores the prebuild system into the filesystem mounted at:
+The script install the prebuild system into the filesystem mounted at:
 
 ```text
 /mnt
@@ -78,15 +78,138 @@ The EFI partition must be available at:
 /boot/efi
 ```
 
+# FIRST WHAT YOU NEED
+
+Download the [Arch Linux ISO](https://archlinux.org/download/) flash it to your usb drive, for windows user use [rufus](https://rufus.ie/en/) or [ventoy](https://www.ventoy.net/en/download.html) and boot into it. Make sure to disable **Secure Boot**.
+
+# PARTITIONING AND FORMATTING
+
+Before running `install.sh`, create the EFI System Partition and the Btrfs system partition from the Arch Linux Live environment.
+
+> **WARNING:** The commands below will erase the selected partitions. Double-check the target disk with `lsblk` before continuing.
+
+## Step 1 — Identify the target disk
+
+List the available disks:
+
+```bash
+lsblk
+```
+
+For example, if the target disk is `/dev/nvme0n1`, use that disk with `cfdisk`.
+
+> **IMPORTANT:** Your device name may be different. SATA drives commonly appear as `/dev/sda`, while NVMe drives commonly appear as `/dev/nvme0n1`.
+
+## Step 2 — Create partitions with cfdisk
+
+Open `cfdisk` on the target disk:
+
+```bash
+cfdisk /dev/nvme0n1
+```
+
+If prompted for a partition table, select:
+
+```text
+gpt
+```
+
+Create the following two partitions:
+
+| Partition | Recommended size | Type | Filesystem |
+|---|---:|---|---|
+| EFI System Partition | 1 GiB | EFI System | FAT32 |
+| System | Remaining space | Linux filesystem | Btrfs |
+
+In `cfdisk`:
+
+1. Select **Free space** or **Delete** the partition that you dont need anymore and choose **New**.
+2. Create a `1G` partition for the EFI System Partition.
+3. Select the new EFI partition, choose **Type**, and set it to **EFI System**.
+4. Select the remaining **Free space** and choose **New**.
+5. Use the remaining space for the Btrfs system partition.
+6. Choose **Write**, type `yes`, and press Enter.
+7. Choose **Quit**.
+
+Verify the resulting partition layout:
+
+```bash
+lsblk
+```
+
+For an NVMe disk, it should look similar to:
+
+```text
+nvme0n1
+├─nvme0n1p1   1G
+└─nvme0n1p2   remaining space
+```
+
+## Step 3 — Format the EFI partition as FAT32
+
+Replace `/dev/nvme0n1p1` with your actual EFI partition:
+
+```bash
+mkfs.fat -F32 /dev/nvme0n1p1
+```
+
+Verify:
+
+```bash
+lsblk -f
+```
+
+The EFI partition should show `vfat` / `FAT32`.
+
+## Step 4 — Format the system partition as Btrfs
+
+Replace `/dev/nvme0n1p2` with your actual Btrfs system partition:
+
+```bash
+mkfs.btrfs -f /dev/nvme0n1p2
+```
+
+Verify:
+
+```bash
+lsblk -f
+```
+
+The system partition should show `btrfs`.
+
+## Step 5 — Mount the Btrfs system partition
+
+Mount the Btrfs system partition at `/mnt`:
+
+```bash
+mount /dev/nvme0n1p2 /mnt
+```
+
+Verify:
+
+```bash
+findmnt /mnt
+```
+
+Check the filesystem type:
+
+```bash
+findmnt -no FSTYPE /mnt
+```
+
+It must return:
+
+```text
+btrfs
+```
+
 > **IMPORTANT:** Do **NOT** mount the EFI System Partition to `/mnt/boot/efi` before the system install.
 >
-> The prebuild filesystem already contains `/boot/efi`. If the ESP is mounted at `/mnt/boot/efi` before the restore, the mounted filesystem can hide the `/boot/efi` directory from the system and cause the restore to conflict with the existing EFI filesystem contents.
+> The prebuild filesystem already contains `/boot/efi`. If the ESP is mounted at `/mnt/boot/efi` before the install, the mounted filesystem can hide the `/boot/efi` directory from the system and cause the install to conflict with the existing EFI filesystem contents.
 >
 > The ESP must therefore be mounted **only after `install.sh` has finished restoring the system**, right before you generate `fstab` and enter `arch-chroot` (the script prints these steps for you at the end).
 
 # INSTALLATION
-
-Download [Arch Linux ISO](https://archlinux.org/download/) flash it to your usb drive and boot into it. Make sure disable **Secure Boot**.
 
 The Arch Linux Live ISO does not include `git` by default. Install it first:
 
@@ -122,7 +245,7 @@ Follow the three steps `install.sh` prints at the end, in this exact order.
 
 ## Step 1 — Mount the EFI partition
 
-**This is the required point to mount the EFI System Partition** — now that the restore is finished, but before generating `fstab` or entering the chroot.
+**This is the required point to mount the EFI System Partition** — now that the install is finished, but before generating `fstab` or entering the chroot.
 
 ```bash
 mount /dev/your-efi-partition /mnt/boot/efi
@@ -136,7 +259,7 @@ findmnt /mnt/boot/efi
 
 It must show the EFI System Partition.
 
-> **IMPORTANT:** The EFI partition is intentionally mounted here, **after the system has been restored**. Do not mount it at `/mnt/boot/efi` before running the restore.
+> **IMPORTANT:** The EFI partition is intentionally mounted here, **after the system has been installed**. Do not mount it at `/mnt/boot/efi` before running the install
 
 ## Step 2 — Generate fstab
 
@@ -152,7 +275,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 arch-chroot /mnt
 ```
 
-You are now inside the restored system.
+You are now inside the installed system.
 
 ## Change username and password
 
@@ -180,7 +303,7 @@ passwd your_name
 
 **THE EASY WAY: USE `efibootmgr`**
 
-The restored system already has **`efibootmgr` and GRUB pre-installed**, so you do not need to install them again.
+The installed system already has **`efibootmgr` and GRUB pre-installed**, so you do not need to install them again.
 
 For the easiest UEFI boot setup, you can use `efibootmgr` to create a UEFI boot entry that points directly to the existing GRUB EFI loader.
 
@@ -202,7 +325,7 @@ After that:
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
-> **NOTE:** `efibootmgr` creates the UEFI firmware boot entry. It does not install GRUB itself. In this restore workflow, GRUB is already present in the restored system, which is why `efibootmgr` can be used as the easy way to register it with the UEFI firmware.
+> **NOTE:** `efibootmgr` creates the UEFI firmware boot entry. It does not install GRUB itself. GRUB is already present in the system, which is why `efibootmgr` can be used as the easy way to register it with the UEFI firmware.
 
 If you prefer to reinstall/configure GRUB manually, you can still use the standard GRUB UEFI installation method for your system.
 
@@ -224,7 +347,7 @@ Remove the Arch Linux USB/ISO when the system starts rebooting.
 
 If you have an **NVIDIA GPU**, driver setup is not guaranteed to work out of the box.
 
-You may need to **troubleshoot the NVIDIA driver yourself** after first boot (proprietary vs open kernel modules, Wayland/Hyprland-specific env vars, etc.). This restore image is not tuned for every NVIDIA configuration, so check the [Arch Wiki NVIDIA page](https://wiki.archlinux.org/title/NVIDIA) and the [Hyprland NVIDIA guide](https://wiki.hypr.land/Nvidia/) if you run into graphical issues, black screens, or tearing.
+You may need to **troubleshoot the NVIDIA driver yourself** after first boot (proprietary vs open kernel modules, Wayland/Hyprland-specific env vars, etc.). This system image is not tuned for every NVIDIA configuration, so check the [Arch Wiki NVIDIA page](https://wiki.archlinux.org/title/NVIDIA) and the [Hyprland NVIDIA guide](https://wiki.hypr.land/Nvidia/) if you run into graphical issues, black screens, or tearing.
 
 # MONITOR CONFIGURATION (Hyprland)
 
@@ -365,7 +488,7 @@ for this project.
 Modified and maintained by [Akim](https://github.com/akimsupernova).
 
 Additional work includes:
-- Custom Arch Linux installation and system restore scripts
+- Custom Arch Linux installation and system install scripts
 - Additional tools and packages
 - System configuration
 - Desktop environment configuration
