@@ -16,6 +16,7 @@
 # ============================================================
 
 set -e
+set -o pipefail
 
 # -----------------------------
 # Colors
@@ -29,11 +30,11 @@ RESET='\033[0m'
 # -----------------------------
 # Configuration
 # -----------------------------
-HF_URL="https://huggingface.co/datasets/akimpng/archprebuild/resolve/main/akimpng.tar.gz"
+HF_BASE_URL="https://huggingface.co/datasets/akimpng/archprebuild/resolve/main"
+PARTS=(aa ab ac ad ae af ag ah)
 
 DOWNLOAD_DIR="/mnt/123"
 EXTRACT_DIR="/mnt/124"
-BACKUP_FILE="${DOWNLOAD_DIR}/akimpng.tar.gz"
 
 # -----------------------------
 # Functions
@@ -93,11 +94,20 @@ success "Running as root."
 
 info "Checking internet connection..."
 
-if ! ping -c 1 -W 3 archlinux.org >/dev/null 2>&1; then
+INTERNET_OK=false
+for i in 1 2 3 4 5; do
+    if ping -c 1 -W 3 archlinux.org >/dev/null 2>&1; then
+        INTERNET_OK=true
+        break
+    fi
+    sleep 2
+done
+
+if [ "$INTERNET_OK" != "true" ]; then
     warning "Internet connection appears to be unavailable."
     echo
     echo "This installer requires an active internet connection"
-    echo "to download the prebuild Arch system from Hugging Face."
+    echo "to download the prebuild Arch system."
     echo
     echo "Please check your network connection and run the script again."
     echo
@@ -127,30 +137,71 @@ echo "                     DOWNLOADING ARCH"
 echo "============================================================"
 echo
 
-info "Downloading prebuild files..."
+info "Downloading prebuild files (${#PARTS[@]} parts)..."
 echo
 
-if ! curl -L --fail -o "$BACKUP_FILE" "$HF_URL"; then
-    echo
-    warning "Prebuild download failed."
-    echo
-    echo "Possible causes:"
-    echo "  - Internet connection was lost"
-    echo "  - The file is no longer publicly accessible"
-    echo "  - The URL is invalid"
-    echo
-    error_exit "Unable to download the prebuild system."
-fi
+# Max attempts per part before giving up (each attempt resumes, not restarts)
+MAX_RETRIES=30
+# Seconds to wait between retry attempts
+RETRY_DELAY=5
 
-if [ ! -f "$BACKUP_FILE" ]; then
-    error_exit "Download finished but the prebuild file was not found."
-fi
+PART_FILES=()
 
-success "Arch downloaded successfully."
+for PART in "${PARTS[@]}"; do
+    PART_FILE="${DOWNLOAD_DIR}/akimpng.tar.gz.${PART}"
+    PART_URL="${HF_BASE_URL}/akimpng.tar.gz.${PART}"
+
+    info "Downloading part ${PART}..."
+
+    ATTEMPT=1
+    DOWNLOAD_OK=false
+
+    while [ "$ATTEMPT" -le "$MAX_RETRIES" ]; do
+        if [ "$ATTEMPT" -gt 1 ]; then
+            warning "Retrying part ${PART} (attempt ${ATTEMPT}/${MAX_RETRIES})..."
+            sleep "$RETRY_DELAY"
+        fi
+
+        # -C -   : resume from where the last attempt left off (needs no restart on a dropped connection)
+        # --retry: let curl itself retry on transient network errors within one attempt
+        # --speed-limit/--speed-time: only abort on a genuine stall (near-zero throughput for 2 minutes
+        #   straight), not on a connection that is merely slow but still making progress
+        if curl -L --fail -C - \
+                --retry 5 --retry-delay 5 --retry-connrefused \
+                --speed-limit 50 --speed-time 120 \
+                -o "$PART_FILE" "$PART_URL"; then
+            DOWNLOAD_OK=true
+            break
+        fi
+
+        ATTEMPT=$((ATTEMPT + 1))
+    done
+
+    if [ "$DOWNLOAD_OK" != "true" ]; then
+        echo
+        warning "Prebuild part download failed: ${PART}"
+        echo
+        echo "Possible causes:"
+        echo "  - Internet connection was lost"
+        echo "  - The file is no longer publicly accessible"
+        echo "  - The URL is invalid"
+        echo
+        error_exit "Unable to download the prebuild system (part ${PART}) after ${MAX_RETRIES} attempts."
+    fi
+
+    if [ ! -f "$PART_FILE" ]; then
+        error_exit "Download finished but part ${PART} was not found."
+    fi
+
+    success "Part ${PART} downloaded."
+    PART_FILES+=("$PART_FILE")
+done
+
+success "All parts downloaded successfully."
 
 echo
-echo "Prebuild size:"
-ls -lh "$BACKUP_FILE"
+echo "Prebuild parts size:"
+ls -lh "${PART_FILES[@]}"
 echo
 
 # -----------------------------
@@ -162,13 +213,17 @@ echo "                    EXTRACTING FILE"
 echo "============================================================"
 echo
 
-info "Extracting system file..."
+info "Extracting system file directly from split parts..."
 
-if ! tar -xvzpf "$BACKUP_FILE" -C "$EXTRACT_DIR"; then
-    error_exit "Failed to extract the archive."
+if ! cat "${PART_FILES[@]}" | tar -xvzpf - -C "$EXTRACT_DIR"; then
+    error_exit "Failed to extract the archive from split parts."
 fi
 
 success "System extracted successfully."
+
+info "Removing downloaded part files..."
+rm -f "${PART_FILES[@]}"
+success "Part files removed."
 
 # -----------------------------
 # Move installed system
