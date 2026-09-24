@@ -247,6 +247,8 @@ fi
 
 success "Arch system restored to /mnt."
 
+pacstrap -K /mnt linux
+
 # -----------------------------
 # Cleanup
 # -----------------------------
