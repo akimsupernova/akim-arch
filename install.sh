@@ -107,7 +107,7 @@ if [ "$INTERNET_OK" != "true" ]; then
     warning "Internet connection appears to be unavailable."
     echo
     echo "This installer requires an active internet connection"
-    echo "to download the prebuild Arch system."
+    echo "to download the prebuild Arch system from Hugging Face."
     echo
     echo "Please check your network connection and run the script again."
     echo
@@ -148,8 +148,8 @@ RETRY_DELAY=5
 PART_FILES=()
 
 for PART in "${PARTS[@]}"; do
-    PART_FILE="${DOWNLOAD_DIR}/akimpng.tar.gz.${PART}"
-    PART_URL="${HF_BASE_URL}/akimpng.tar.gz.${PART}"
+    PART_FILE="${DOWNLOAD_DIR}/akimpng.tar.gz.part.${PART}"
+    PART_URL="${HF_BASE_URL}/akimpng.tar.gz.part.${PART}"
 
     info "Downloading part ${PART}..."
 
