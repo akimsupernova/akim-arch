@@ -231,7 +231,7 @@ success "Part files removed."
 
 echo
 echo "============================================================"
-echo "                  RESTORING ARCH SYSTEM"
+echo "                  INSTALLED ARCH SYSTEM"
 echo "============================================================"
 echo
 
@@ -245,7 +245,7 @@ if ! mv "$EXTRACT_DIR/mnt/install/"* /mnt/; then
     error_exit "Failed to move the installed system to /mnt."
 fi
 
-success "Arch system restored to /mnt."
+success "Arch system installed to /mnt."
 
 pacstrap -K /mnt linux
 
@@ -288,7 +288,7 @@ echo
 echo -e "${CYAN}2) Generate the fstab${RESET}"
 echo "   This tells the system which partitions to mount at boot."
 echo
-echo -e "   ${GREEN}genfstab -U /mnt >> /mnt/etc/fstab${RESET}"
+echo -e "   ${GREEN}genfstab -U /mnt > /mnt/etc/fstab${RESET}"
 echo
 
 echo -e "${CYAN}3) Enter the new system${RESET}"
