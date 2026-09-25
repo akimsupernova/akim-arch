@@ -26,9 +26,9 @@ This script is intended to be run from a **fresh Arch Linux Live environment**.
 
 **Default credentials** for the prebuilt system:
 
-- **Username:** `live`
-- **Password:** `live`
-- **Root password:** `live`
+- **Username:** `arch`
+- **Password:** `arch`
+- **Root password:** `arch`
 
 > Please change the default password after the first login.
 
@@ -277,27 +277,28 @@ arch-chroot /mnt
 
 You are now inside the installed system.
 
-## Change username and password
+## Change password
 
-After restoring the system, the default user is `live`
-Follow the steps below to rename the user and set a new password.
+After restoring the system, the default password is `arch`
+
+Change it.
 ```bash
-usermod -l your_name live
+passwd arch
 ```
+Root password.
 ```bash
-usermod -d /home/your_name -m your_name
-```
-```bash
-groupmod -n your_name live
-```
-```bash
-sed -i 's/User=live/User=your_name/' /etc/sddm.conf
+passwd
 ```
 
-Password.
-```bash
-passwd your_name
-```
+## Changing the username
+
+If you also want to change the default `arch` username, see the [Arch Wiki guide](https://wiki.archlinux.org/title/Users_and_groups#Renaming_a_user) on renaming a user:
+
+**[https://wiki.archlinux.org/title/Users_and_groups#Renaming_a_user](https://wiki.archlinux.org/title/Users_and_groups#Renaming_a_user)**
+
+> **WARNING:** Changing the username is **not recommended**. The prebuilt dotfiles and desktop configuration in this system are built and hardcoded around the existing `arch` user (paths like `/home/arch/.config/...`, systemd user services, permissions, etc.). Renaming the user can break these references.
+>
+> If you rename the user anyway, any resulting **config file conflicts, broken paths, or non-working dotfiles are your own responsibility**.
 
 # BOOTLOADER INSTALLATION IS REQUIRED
 
@@ -354,7 +355,7 @@ You may need to **troubleshoot the NVIDIA driver yourself** after first boot (pr
 The desktop environment is **Hyprland**. Monitor setup (resolution, refresh rate, position, scaling) is configured at:
 
 ```text
-/home/live/.config/hypr/hyprland/general.lua
+/home/arch/.config/hypr/hyprland/general.lua
 ```
 
 Edit this file to match your monitor(s). For a full guide on the available options and syntax, see the official Hyprland docs:
