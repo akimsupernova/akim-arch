@@ -1,44 +1,19 @@
 #!/bin/bash
 
-# ============================================================
-#                     AKIMPNG ARCH INSTALLER
-# ============================================================
-#
-#  Custom Arch installation script by akimpng
-#
-#  Logic:
-#    1. Download akimpng.tar.gz from Hugging Face
-#    2. Extract it to a temporary directory
-#    3. Move /mnt/install/* to /mnt
-#    4. Generate fstab
-#    5. Enter the installed system using arch-chroot
-#
-# ============================================================
-
 set -e
 set -o pipefail
 
-# -----------------------------
-# Colors
-# -----------------------------
 RED='\033[1;31m'
 GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[1;36m'
 RESET='\033[0m'
 
-# -----------------------------
-# Configuration
-# -----------------------------
 HF_BASE_URL="https://huggingface.co/datasets/akimpng/archprebuild/resolve/main"
 PARTS=(aa ab ac ad ae af ag ah)
 
 DOWNLOAD_DIR="/mnt/123"
 EXTRACT_DIR="/mnt/124"
-
-# -----------------------------
-# Functions
-# -----------------------------
 
 error_exit() {
     echo
@@ -60,10 +35,6 @@ info() {
     echo -e "${CYAN}[INFO]${RESET} $1"
 }
 
-# -----------------------------
-# Banner
-# -----------------------------
-
 clear
 
 echo -e "${CYAN}"
@@ -78,19 +49,11 @@ echo
 echo "============================================================"
 echo
 
-# -----------------------------
-# Check root
-# -----------------------------
-
 if [ "$EUID" -ne 0 ]; then
     error_exit "This script must be run as root."
 fi
 
 success "Running as root."
-
-# -----------------------------
-# Check internet connection
-# -----------------------------
 
 info "Checking internet connection..."
 
@@ -116,20 +79,12 @@ fi
 
 success "Internet connection is available."
 
-# -----------------------------
-# Prepare directories
-# -----------------------------
-
 info "Preparing temporary directories..."
 
 mkdir -p "$DOWNLOAD_DIR"
 mkdir -p "$EXTRACT_DIR"
 
 success "Temporary directories ready."
-
-# -----------------------------
-# Download prebuild
-# -----------------------------
 
 echo
 echo "============================================================"
@@ -140,9 +95,7 @@ echo
 info "Downloading prebuild files (${#PARTS[@]} parts)..."
 echo
 
-# Max attempts per part before giving up (each attempt resumes, not restarts)
 MAX_RETRIES=30
-# Seconds to wait between retry attempts
 RETRY_DELAY=5
 
 PART_FILES=()
@@ -162,10 +115,6 @@ for PART in "${PARTS[@]}"; do
             sleep "$RETRY_DELAY"
         fi
 
-        # -C -   : resume from where the last attempt left off (needs no restart on a dropped connection)
-        # --retry: let curl itself retry on transient network errors within one attempt
-        # --speed-limit/--speed-time: only abort on a genuine stall (near-zero throughput for 2 minutes
-        #   straight), not on a connection that is merely slow but still making progress
         if curl -L --fail -C - \
                 --retry 5 --retry-delay 5 --retry-connrefused \
                 --speed-limit 50 --speed-time 120 \
@@ -204,10 +153,6 @@ echo "Prebuild parts size:"
 ls -lh "${PART_FILES[@]}"
 echo
 
-# -----------------------------
-# Extract prebuild
-# -----------------------------
-
 echo "============================================================"
 echo "                    EXTRACTING FILE"
 echo "============================================================"
@@ -224,10 +169,6 @@ success "System extracted successfully."
 info "Removing downloaded part files..."
 rm -f "${PART_FILES[@]}"
 success "Part files removed."
-
-# -----------------------------
-# Move installed system
-# -----------------------------
 
 echo
 echo "============================================================"
@@ -248,10 +189,6 @@ fi
 success "Arch system installed to /mnt."
 
 pacstrap -K /mnt linux
-
-# -----------------------------
-# Cleanup
-# -----------------------------
 
 info "Cleaning temporary files..."
 

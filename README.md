@@ -294,8 +294,6 @@ passwd
 
 If you also want to change the default `arch` username, see the [Arch Wiki guide](https://wiki.archlinux.org/title/Users_and_groups#Renaming_a_user) on renaming a user:
 
-**[https://wiki.archlinux.org/title/Users_and_groups#Renaming_a_user](https://wiki.archlinux.org/title/Users_and_groups#Renaming_a_user)**
-
 > **WARNING:** Changing the username is **not recommended**. The prebuilt dotfiles and desktop configuration in this system are built and hardcoded around the existing `arch` user (paths like `/home/arch/.config/...`, systemd user services, permissions, etc.). Renaming the user can break these references.
 >
 > If you rename the user anyway, any resulting **config file conflicts, broken paths, or non-working dotfiles are your own responsibility**.
@@ -350,17 +348,27 @@ If you have an **NVIDIA GPU**, driver setup is not guaranteed to work out of the
 
 You may need to **troubleshoot the NVIDIA driver yourself** after first boot (proprietary vs open kernel modules, Wayland/Hyprland-specific env vars, etc.). This system image is not tuned for every NVIDIA configuration, so check the [Arch Wiki NVIDIA page](https://wiki.archlinux.org/title/NVIDIA) and the [Hyprland NVIDIA guide](https://wiki.hypr.land/Nvidia/) if you run into graphical issues, black screens, or tearing.
 
-# MONITOR CONFIGURATION (Hyprland)
+# MONITOR CONFIGURATION
 
-The desktop environment is **Hyprland**. Monitor setup (resolution, refresh rate, position, scaling) is configured at:
+The desktop environment is **Hyprland**. Monitor configuration (resolution, refresh rate, position, scaling) can be managed directly from the desktop.
+
+To change your monitor resolution or other display settings, press:
+
+```text
+Super + T
+```
+
+This opens the **Monitor Configuration** interface, where you can adjust the monitor settings without manually editing the Hyprland configuration.
+
+The monitor settings are also configured through the Hyprland configuration at:
 
 ```text
 /home/arch/.config/hypr/hyprland/general.lua
 ```
 
-Edit this file to match your monitor(s). For a full guide on the available options and syntax, see the official Hyprland docs:
+For a full guide on the available Hyprland monitor options and syntax, see the official Hyprland docs:
 
-**[https://wiki.hypr.land/Configuring/Basics/Monitors/](https://wiki.hypr.land/Configuring/Basics/Monitors/)**
+**https://wiki.hypr.land/Configuring/Basics/Monitors/**
 
 # KEYBINDINGS
 
@@ -375,7 +383,7 @@ Edit this file to match your monitor(s). For a full guide on the available optio
 | `Super + V` | Clipboard history |
 | `Super + .` | Emoji picker |
 | `Super + A` | Left sidebar |
-| `Super + N` | Right sidebar |
+| `Super + Alt + A` | Detach left sidebar |
 | `Super + B` | Toggle cleaner |
 | `Super + /` | Keybind cheatsheet |
 | `Super + K` | On-screen keyboard |
@@ -383,21 +391,24 @@ Edit this file to match your monitor(s). For a full guide on the available optio
 | `Super + G` | Widget overlay |
 | `Super + J` | Toggle bar |
 | `Ctrl + Alt + Delete` | Session menu |
-| `Super + L` | Lock screen |
-| `Super + Shift + L` | Suspend |
+| `Super + N` | Right sidebar |
+| `Super + Alt + K` | Calculator |
 
 ## Applications
 
 | Keybind | Action |
 |---|---|
-| `Super + Enter` / `Super + T` | Terminal |
+| `Super + Enter` | Terminal |
+| `Ctrl + Alt + T` | Terminal |
 | `Super + E` | File manager |
 | `Super + W` | Browser |
 | `Super + C` | Code editor |
+| `Super + X` | Steam |
 | `Ctrl + Super + V` | Volume mixer |
-| `Super + I` | Settings |
+| `Super + I` | Settings app |
 | `Ctrl + Shift + Esc` | Task manager |
-| `Ctrl + Super + Shift + Alt + W` | Office |
+| `Ctrl + Super + Shift + Alt + W` | Office software |
+| `Super + T` | Monitor Configuration |
 
 ## Windows
 
@@ -407,6 +418,7 @@ Edit this file to match your monitor(s). For a full guide on the available optio
 | `Super + Shift + Left/Right/Up/Down` | Move window |
 | `Super + Left Click` | Move window |
 | `Super + Right Click` | Resize window |
+| `Alt + F4` | Show wrong-close-key notification |
 | `Super + Q` | Close window |
 | `Super + Shift + Alt + Q` | Force close window |
 | `Super + Alt + Space` | Float / tile |
@@ -426,9 +438,13 @@ Edit this file to match your monitor(s). For a full guide on the available optio
 |---|---|
 | `Super + 1–0` | Switch to workspace 1–10 |
 | `Ctrl + Super + Left/Right` | Previous / next workspace |
+| `Ctrl + Super + Alt + Left/Right` | Focus busy workspace left / right |
 | `Super + Page Up/Down` | Previous / next workspace |
 | `Ctrl + Super + Page Up/Down` | Previous / next workspace |
+| `Ctrl + Super + BracketLeft/BracketRight` | Focus adjacent workspace |
+| `Ctrl + Super + Up/Down` | Focus workspace 5 positions left / right |
 | `Super + S` | Toggle scratchpad |
+| `Super + mouse side button` | Toggle scratchpad |
 
 ## Screenshots & Capture
 
@@ -455,8 +471,7 @@ Edit this file to match your monitor(s). For a full guide on the available optio
 | `Super + Shift + M` | Toggle audio mute |
 | `Super + Alt + M` | Toggle microphone mute |
 | `Super + Shift + P` | Shutdown |
-| `Super + Scroll Mouse Up` | Volume up |
-| `Super + Scroll Mouse Down` | Volume down |
+| `Super + Scroll Up/Down` | Adjust volume |
 
 ## Screen & Appearance
 
@@ -464,7 +479,7 @@ Edit this file to match your monitor(s). For a full guide on the available optio
 |---|---|
 | `Super + -` | Zoom out |
 | `Super + =` | Zoom in |
-| `Ctrl + Super + T` | Wallpaper selector |
+| `Ctrl + Super + T` | Wallpaper selector / color switch |
 | `Ctrl + Super + Alt + T` | Random wallpaper |
 | `Ctrl + Super + Shift + D` | Toggle light / dark mode |
 | `Ctrl + Super + R` | Restart widgets |
