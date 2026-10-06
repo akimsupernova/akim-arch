@@ -247,8 +247,6 @@ shopt -u dotglob nullglob
 
 success "Arch system installed to /mnt."
 
-pacstrap -K /mnt linux
-
 info "Generating fstab..."
 
 if ! genfstab -U /mnt > /mnt/etc/fstab; then
@@ -263,6 +261,8 @@ rm -rf "$DOWNLOAD_DIR"
 rm -rf "$EXTRACT_DIR"
 
 success "Temporary files removed."
+
+mv quickshell/tools/installsystem.sh /mnt/root/
 
 echo
 echo "============================================================"
@@ -279,21 +279,15 @@ echo "============================================================"
 echo "                       NEXT STEPS"
 echo "============================================================"
 echo
-echo -e "${YELLOW}The system files and fstab are in place. Only two steps remain.${RESET}"
+echo -e "${YELLOW}The system files and fstab are in place. Only one step remain.${RESET}"
 echo
 
-echo -e "${CYAN}1) Enter the new system${RESET}"
-echo
-echo -e "   ${GREEN}arch-chroot /mnt${RESET}"
-echo
-
-echo -e "${CYAN}2) Finish the installation${RESET}"
-echo "   Checks for missing files, downloads them with pacman, and"
-echo "   builds/installs the bootloader to the EFI partition at /boot."
-echo "   (needs an internet connection)"
+echo -e "${CYAN}Finish the installation by typing this command bellow${RESET}"
 echo
 echo -e "   ${GREEN}installsystem${RESET}"
 echo
 
 echo "============================================================"
 echo
+
+arch-chroot /mnt

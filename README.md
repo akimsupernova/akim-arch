@@ -68,14 +68,13 @@ cd akim-arch
 
 The script downloads the system, restores it to `/mnt`, and generates `fstab`.
 
-**5. Finish inside the chroot**
+**5. Finish the installation by running this command**
 
 ```bash
-arch-chroot /mnt
 installsystem
 ```
 
-`installsystem` checks for missing files, downloads them with pacman, then builds and installs the bootloader to the EFI partition at `/boot`. Keep your internet connection on.
+`installsystem` checks for missing files, downloads them, then builds and installs the bootloader to the EFI partition at `/boot`.
 
 **6. Reboot**
 
