@@ -57,4 +57,3 @@ echo
 echo "========================================"
 echo "  Installation completed successfully!"
 echo "========================================"
-```
